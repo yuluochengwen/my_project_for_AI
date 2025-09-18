@@ -1,0 +1,32 @@
+# 2025_机器学习项目依赖文件，python版本3.8+
+# 使用方法：在命令行运行 `conda install --file requirements.txt` 或 `pip install -r requirements.txt`（推荐conda优先）
+
+flask
+flask-cors
+pandas
+numpy
+joblib
+pymysql
+catboost
+scikit-learn
+matplotlib
+seaborn
+lightgbm
+xgboost
+shap
+optuna
+scipy
+requests
+openpyxl
+streamlit
+jupyter
+notebook
+pyyaml
+plotly
+python-dotenv
+pygame
+
+# 说明：
+# 1. 已根据项目代码和已安装环境自动生成。
+# 2. 如有特殊依赖请手动补充。
+# 3. 推荐使用conda安装，部分包如catboost、lightgbm、xgboost等建议用conda或pip安装。

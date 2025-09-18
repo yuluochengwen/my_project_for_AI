@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>心脏病风险预测系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 25%, #ce4993 50%, #b73e56 75%, #a53860 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .form-container {
+            padding: 40px;
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            color: #e74c3c;
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e74c3c;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #e74c3c;
+            box-shadow: 0 0 10px rgba(231, 76, 60, 0.2);
+        }
+
+        .form-group .help-text {
+            font-size: 0.9em;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+
+        .submit-container {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(231, 76, 60, 0.3);
+        }
+
+        .submit-btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #e74c3c;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .result {
+            display: none;
+            margin-top: 30px;
+            padding: 25px;
+            border-radius: 10px;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result.healthy {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+        }
+
+        .result.heart-disease {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+        }
+
+        .result h3 {
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .result-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .result-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .result-item .label {
+            font-size: 0.9em;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+
+        .result-item .value {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .error {
+            background: #e74c3c;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .info-section {
+            background: #f8f9fa;
+            padding: 20px;
+            margin-top: 30px;
+            border-radius: 10px;
+        }
+
+        .info-section h4 {
+            color: #e74c3c;
+            margin-bottom: 10px;
+        }
+
+        .info-section ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .info-section li {
+            margin-bottom: 5px;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .info-section li:before {
+            content: "❤️";
+            position: absolute;
+            left: 0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 10px;
+            }
+
+            .form-container {
+                padding: 20px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .risk-indicator {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .risk-low { background: #2ecc71; color: white; }
+        .risk-medium { background: #f39c12; color: white; }
+        .risk-high { background: #e67e22; color: white; }
+        .risk-very-high { background: #e74c3c; color: white; }
+
+        /* AI 助手样式 */
+        .assistant-panel {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            width: 340px;
+            max-height: 70vh;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 999;
+        }
+        .assistant-header {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: #fff;
+            padding: 10px 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .assistant-header h4 {
+            margin: 0; font-size: 14px;
+        }
+        .assistant-body {
+            padding: 10px; overflow-y: auto; flex: 1;
+        }
+        .assistant-msg { margin: 8px 0; display: flex; }
+        .assistant-msg.user { justify-content: flex-end; }
+        .assistant-bubble {
+            max-width: 80%; padding: 8px 12px; border-radius: 12px;
+            background: #f1f2f6; color: #2c3e50; font-size: 14px;
+            white-space: pre-wrap; line-height: 1.4;
+        }
+        .assistant-msg.user .assistant-bubble { background: #e8f8f2; }
+        .assistant-footer { padding: 8px; border-top: 1px solid #eee; display: flex; gap: 6px; }
+        .assistant-input { flex: 1; padding: 8px 10px; border: 1px solid #ddd; border-radius: 8px; }
+        .assistant-send { background: #e74c3c; color: #fff; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; }
+        .assistant-toggle { position: fixed; right: 24px; bottom: 24px; background: #e74c3c; color: #fff; border: none; padding: 12px 14px; border-radius: 50%; cursor: pointer; box-shadow: 0 10px 20px rgba(0,0,0,0.2); z-index: 998; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🫀 心脏病风险预测系统</h1>
+            <p>基于AI技术的心脏健康风险评估工具</p>
+            <p style="font-size: 0.9em; margin-top: 10px; opacity: 0.8;">
+                🤖 SMOTE平衡优化模型 | 零漏诊率 | 高精确度预测
+            </p>
+        </div>
+
+        <div class="form-container">
+            <form id="heartPredictionForm">
+                <div class="form-section">
+                    <div class="section-title">📊 基本信息</div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="age">年龄</label>
+                            <input type="number" id="age" name="Age" min="1" max="120" required>
+                            <div class="help-text">请输入您的实际年龄</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="sex">性别</label>
+                            <select id="sex" name="Sex" required>
+                                <option value="">请选择</option>
+                                <option value="M">男性</option>
+                                <option value="F">女性</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="section-title">💔 症状信息</div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="chestPainType">胸痛类型</label>
+                            <select id="chestPainType" name="ChestPainType" required>
+                                <option value="">请选择</option>
+                                <option value="TA">典型心绞痛</option>
+                                <option value="ATA">不典型心绞痛</option>
+                                <option value="NAP">非心绞痛性疼痛</option>
+                                <option value="ASY">无症状</option>
+                            </select>
+                            <div class="help-text">描述您的胸痛类型</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="exerciseAngina">运动诱发心绞痛</label>
+                            <select id="exerciseAngina" name="ExerciseAngina" required>
+                                <option value="">请选择</option>
+                                <option value="是">是</option>
+                                <option value="否">否</option>
+                            </select>
+                            <div class="help-text">运动时是否出现胸痛</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="section-title">🩺 生理指标</div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="restingBP">静息血压 (mmHg)</label>
+                            <input type="number" id="restingBP" name="RestingBP" min="80" max="200" required>
+                            <div class="help-text">正常范围: 90-140 mmHg</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="cholesterol">胆固醇 (mg/dl)</label>
+                            <input type="number" id="cholesterol" name="Cholesterol" min="100" max="600" required>
+                            <div class="help-text">正常范围: 150-250 mg/dl</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="fastingBS">空腹血糖 > 120 mg/dl</label>
+                            <select id="fastingBS" name="FastingBS" required>
+                                <option value="">请选择</option>
+                                <option value="是">是</option>
+                                <option value="否">否</option>
+                            </select>
+                            <div class="help-text">空腹血糖是否超过120 mg/dl</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="maxHR">最大心率</label>
+                            <input type="number" id="maxHR" name="MaxHR" min="60" max="220" required>
+                            <div class="help-text">运动时达到的最大心率</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="section-title">📈 检查结果</div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="restingECG">静息心电图</label>
+                            <select id="restingECG" name="RestingECG" required>
+                                <option value="">请选择</option>
+                                <option value="Normal">正常</option>
+                                <option value="ST">ST-T波异常</option>
+                                <option value="LVH">左心室肥厚</option>
+                            </select>
+                            <div class="help-text">静息状态下的心电图结果</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="oldpeak">ST抑制</label>
+                            <input type="number" id="oldpeak" name="Oldpeak" min="0" max="10" step="0.1" required>
+                            <div class="help-text">运动相对于静息诱发的ST抑制</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="stSlope">ST段斜率</label>
+                            <select id="stSlope" name="ST_Slope" required>
+                                <option value="">请选择</option>
+                                <option value="Up">上升</option>
+                                <option value="Flat">平坦</option>
+                                <option value="Down">下降</option>
+                            </select>
+                            <div class="help-text">运动时ST段的斜率</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="submit-container">
+                    <button type="submit" class="submit-btn" id="submitBtn">
+                        🔍 开始预测
+                    </button>
+                </div>
+            </form>
+
+            <div class="loading" id="loading">
+                <div class="loading-spinner"></div>
+                <p>正在分析您的心脏健康状况...</p>
+            </div>
+
+            <div class="error" id="error"></div>
+
+            <div class="result" id="result">
+                <h3 id="resultTitle"></h3>
+                <p id="resultDescription"></p>
+                <div class="result-details">
+                    <div class="result-item">
+                        <div class="label">健康概率</div>
+                        <div class="value" id="healthyProb"></div>
+                    </div>
+                    <div class="result-item">
+                        <div class="label">心脏病概率</div>
+                        <div class="value" id="heartDiseaseProb"></div>
+                    </div>
+                    <div class="result-item">
+                        <div class="label">预测置信度</div>
+                        <div class="value" id="confidence"></div>
+                    </div>
+                    <div class="result-item">
+                        <div class="label">风险等级</div>
+                        <div class="value" id="riskLevel"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <h4>📋 使用说明</h4>
+                <ul>
+                    <li>请确保所有检查数据准确填写</li>
+                    <li>本系统仅供参考，不能替代专业医学诊断</li>
+                    <li>如有异常结果，请及时咨询专业医师</li>
+                    <li>定期体检是预防心脏病的最佳方式</li>
+                    <li>保持健康的生活方式和饮食习惯</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI 助手浮窗 -->
+    <button id="assistantToggle" class="assistant-toggle" title="AI 助手">💬</button>
+    <div id="assistantPanel" class="assistant-panel" style="display:none;">
+        <div class="assistant-header">
+            <h4>🧑‍⚕️ 心脏健康 AI 助手</h4>
+            <button id="assistantClose" style="background:transparent;border:none;color:#fff;cursor:pointer;">✖</button>
+        </div>
+        <div id="assistantBody" class="assistant-body"></div>
+        <div class="assistant-footer">
+            <input id="assistantInput" class="assistant-input" placeholder="请输入您的问题，例如：胸痛如何处理？" />
+            <button id="assistantSend" class="assistant-send">发送</button>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('heartPredictionForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const loading = document.getElementById('loading');
+            const result = document.getElementById('result');
+            const error = document.getElementById('error');
+            
+            // 隐藏之前的结果
+            result.style.display = 'none';
+            error.style.display = 'none';
+            
+            // 显示加载状态
+            loading.style.display = 'block';
+            submitBtn.disabled = true;
+            submitBtn.textContent = '🔄 分析中...';
+            
+            try {
+                // 收集表单数据
+                const formData = new FormData(this);
+                const data = {};
+                for (let [key, value] of formData.entries()) {
+                    data[key] = value;
+                }
+                
+                console.log('发送的数据:', data);
+                
+                // 发送预测请求
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const responseData = await response.json();
+                console.log('服务器响应:', responseData);
+                
+                if (responseData.success) {
+                    displayResult(responseData);
+                } else {
+                    showError(responseData.error || '预测失败，请重试');
+                }
+                
+            } catch (err) {
+                console.error('请求错误:', err);
+                showError('网络连接错误，请检查服务器是否启动');
+            } finally {
+                // 恢复按钮状态
+                loading.style.display = 'none';
+                submitBtn.disabled = false;
+                submitBtn.textContent = '🔍 开始预测';
+            }
+        });
+        
+        function displayResult(data) {
+            const result = document.getElementById('result');
+            const resultTitle = document.getElementById('resultTitle');
+            const resultDescription = document.getElementById('resultDescription');
+            const healthyProb = document.getElementById('healthyProb');
+            const heartDiseaseProb = document.getElementById('heartDiseaseProb');
+            const confidence = document.getElementById('confidence');
+            const riskLevel = document.getElementById('riskLevel');
+            
+            // 设置结果内容
+            resultTitle.textContent = data.prediction === 0 ? '💚 心脏健康' : '❤️‍🩹 存在心脏病风险';
+            resultDescription.textContent = data.interpretation;
+            
+            healthyProb.textContent = (data.probability.healthy * 100).toFixed(1) + '%';
+            heartDiseaseProb.textContent = (data.probability.heart_disease * 100).toFixed(1) + '%';
+            confidence.textContent = (data.confidence * 100).toFixed(1) + '%';
+            
+            // 设置风险等级颜色
+            const riskClass = getRiskClass(data.risk_level);
+            riskLevel.innerHTML = `<span class="risk-indicator ${riskClass}">${data.risk_level}</span>`;
+            
+            // 设置结果背景色
+            result.className = 'result ' + (data.prediction === 0 ? 'healthy' : 'heart-disease');
+            result.style.display = 'block';
+            
+            // 滚动到结果区域
+            result.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function getRiskClass(riskLevel) {
+            switch(riskLevel) {
+                case '低风险': return 'risk-low';
+                case '中等风险': return 'risk-medium';
+                case '高风险': return 'risk-high';
+                case '极高风险': return 'risk-very-high';
+                default: return 'risk-medium';
+            }
+        }
+        
+        function showError(message) {
+            const error = document.getElementById('error');
+            error.textContent = '❌ ' + message;
+            error.style.display = 'block';
+            error.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // 表单验证
+        document.addEventListener('DOMContentLoaded', function() {
+            // 为数字输入框添加实时验证
+            const numberInputs = document.querySelectorAll('input[type="number"]');
+            numberInputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    const min = parseFloat(this.min);
+                    const max = parseFloat(this.max);
+                    const value = parseFloat(this.value);
+                    
+                    if (value < min || value > max) {
+                        this.style.borderColor = '#e74c3c';
+                    } else {
+                        this.style.borderColor = '#2ecc71';
+                    }
+                });
+            });
+
+            // AI 助手交互
+            const panel = document.getElementById('assistantPanel');
+            const toggle = document.getElementById('assistantToggle');
+            const closeBtn = document.getElementById('assistantClose');
+            const body = document.getElementById('assistantBody');
+            const input = document.getElementById('assistantInput');
+            const sendBtn = document.getElementById('assistantSend');
+            const history = [];
+
+            function appendMsg(role, text) {
+                const wrap = document.createElement('div');
+                wrap.className = 'assistant-msg ' + (role === 'user' ? 'user' : 'assistant');
+                const bubble = document.createElement('div');
+                bubble.className = 'assistant-bubble';
+                bubble.textContent = text;
+                wrap.appendChild(bubble);
+                body.appendChild(wrap);
+                body.scrollTop = body.scrollHeight;
+            }
+
+            toggle.addEventListener('click', () => {
+                panel.style.display = panel.style.display === 'none' ? 'flex' : 'none';
+                if (panel.style.display !== 'none') input.focus();
+            });
+            closeBtn.addEventListener('click', () => panel.style.display = 'none');
+
+            async function send() {
+                const msg = (input.value || '').trim();
+                if (!msg) return;
+                appendMsg('user', msg);
+                history.push({ role: 'user', content: msg });
+                input.value = '';
+
+                appendMsg('assistant', '思考中...');
+                try {
+                    const res = await fetch('/ai_chat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ message: msg, history })
+                    });
+                    const data = await res.json();
+                    body.lastChild.querySelector('.assistant-bubble').textContent = data.success ? data.reply : (data.error || '服务暂不可用');
+                    if (data.success) history.push({ role: 'assistant', content: data.reply });
+                } catch (e) {
+                    body.lastChild.querySelector('.assistant-bubble').textContent = '网络异常，请稍后重试';
+                }
+            }
+
+            sendBtn.addEventListener('click', send);
+            input.addEventListener('keydown', (e) => { if (e.key === 'Enter') send(); });
+        });
+    </script>
+</body>
+</html>

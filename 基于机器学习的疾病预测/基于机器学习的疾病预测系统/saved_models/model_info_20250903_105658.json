@@ -1,0 +1,12 @@
+{
+  "timestamp": "20250903_105658",
+  "data_path": "data_set/heart.csv",
+  "target_column": "HeartDisease",
+  "n_features": 11,
+  "n_classes": 2,
+  "class_distribution": {
+    "1": 508,
+    "0": 410
+  },
+  "best_model": "RandomForest"
+}

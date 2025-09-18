@@ -1,0 +1,12 @@
+{
+  "timestamp": "20250903_110117",
+  "data_path": "data_set/hypothyroid.csv",
+  "target_column": "binaryClass",
+  "n_features": 25,
+  "n_classes": 2,
+  "class_distribution": {
+    "1": 3479,
+    "0": 291
+  },
+  "best_model": "CatBoost"
+}

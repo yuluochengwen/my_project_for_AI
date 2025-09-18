@@ -1,0 +1,10 @@
+CatBoost健康预测模型信息
+========================================
+timestamp: 20250902_120155
+model_type: CatBoost + StandardScaler Pipeline
+test_accuracy: 0.9811320754716981
+test_auc: 0.9947417742607247
+feature_count: 33
+training_samples: 2967
+test_samples: 742
+catboost_params: {'verbose': False, 'random_state': 42}

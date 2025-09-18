@@ -1,0 +1,23 @@
+SMOTE平衡优化模型性能报告
+==================================================
+
+timestamp: 20250902_162430
+model_type: SMOTE + CatBoost Pipeline (Balanced)
+original_imbalance_ratio: 12:1
+balanced_ratio: 1:1
+training_samples: 812
+test_accuracy: 0.9510869565217391
+test_recall_minority: 0.9390243902439024
+test_precision_minority: 0.9506172839506173
+test_f1_minority: 0.9447852760736196
+test_auc: 0.9888809182209469
+improvement_recall: 0.08536585365853655
+improvement_f1: 0.08588957055214719
+key_achievement: Zero false negatives for healthy individuals
+
+==================================================
+性能对比总结:
+召回率提升: +8.5%
+F1分数提升: +8.6%
+精确率提升: +8.6%
+关键成就: 实现健康人群零漏诊
